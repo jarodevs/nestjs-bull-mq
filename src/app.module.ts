@@ -3,7 +3,7 @@ import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
 import {MessageConsumer} from './message-consumer/message-consumer';
-import {MessageProducerService} from './message-producer/message-producer.service';
+import {EmissionRecordProducerService} from './emission-record-producer/emission-record-producer.service';
 
 @Module({
 	imports: [
@@ -14,11 +14,14 @@ import {MessageProducerService} from './message-producer/message-producer.servic
 			},
 		}),
 		BullModule.registerQueue({
-			name: 'message-queue',
+			name: 'emission-record',
+		}),
+		BullModule.registerQueue({
+			name: 'emission-record-audit',
 		}),
 	],
 	exports: [BullModule],
 	controllers: [AppController],
-	providers: [AppService, MessageProducerService, MessageConsumer],
+	providers: [AppService, MessageConsumer, EmissionRecordProducerService],
 })
 export class AppModule {}

@@ -1,14 +1,15 @@
-import {Controller, Get, Query} from '@nestjs/common';
-import {AppService} from './app.service';
-import {MessageProducerService} from './message-producer/message-producer.service';
+import {Controller, Logger, Post} from '@nestjs/common';
+import {EmissionRecordProducerService} from './emission-record-producer/emission-record-producer.service';
+import {EmissionRecordDTO} from './emission-record.dto';
 
 @Controller()
 export class AppController {
-	constructor(private readonly appService: AppService, private readonly messageProducerService: MessageProducerService) {}
+	constructor(readonly emissionRecordProducerService: EmissionRecordProducerService) {
+	}
 
-	@Get('send-msg')
-	async getInvokeMsg(@Query('msg') msg: string) {
-		this.messageProducerService.sendMessage(msg);
-		return msg;
+	@Post('emission-record')
+	async processEmissionRecord(emissionRecord: EmissionRecordDTO): Promise<EmissionRecordDTO> {
+		this.emissionRecordProducerService.processNewEmissionRecord(emissionRecord)
+		return emissionRecord
 	}
 }
