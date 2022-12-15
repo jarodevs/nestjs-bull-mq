@@ -3,8 +3,7 @@ import {Logger} from "@nestjs/common";
 import {Job, Queue} from "bull";
 import * as path from "path";
 import * as fs from "fs";
-import {EmissionRecordAuditJob, EmissionRecordJob} from "src/emission-record.dto";
-import {EmissionRecord, EmissionRecordAudit} from "src/emission-record.entities";
+import {EmissionRecord, EmissionRecordAudit, EmissionRecordAuditSavedJob} from "src/emission-record.entities";
 
 @Processor('emission-record-audit')
 export class EmissionRecordAuditConsumer {
@@ -22,25 +21,34 @@ export class EmissionRecordAuditConsumer {
 		this.logger.log(`[EmissionRecord:Consummer:Audit] Receive Emission Record ${data.emission_record_id} and Audit ${data.audit_record_id}`)
 		// get mock db file
 		const auditDb = fs.readFileSync(this.auditDbFile, {encoding: 'utf8'})
+		const auditObject = {
+			emission_record_id: data.emission_record_id,
+			audit_record_id: data.audit_record_id,
+			created_at: data.created_at,
+			updated_fields: data.updated_fields,
+			issuer: data.issuer
+		}
 		let dataToWrite: string;
 		if (!auditDb || !JSON.parse(auditDb).audits) {
 			dataToWrite = JSON.stringify({
 				audits: [
-					data
+					auditObject
 				]
 			})
 		} else {
 			const parsedAuditDb = JSON.parse(auditDb)
-			parsedAuditDb.audits.push(data)
+			parsedAuditDb.audits.push(auditObject)
 			dataToWrite = JSON.stringify(parsedAuditDb)
 		}
 
 		fs.writeFileSync(this.auditDbFile, dataToWrite)
 		this.logger.log(`[EmissionRecord:Consummer:Audit] Audit saved`)
-		await this.emissionRecordAuditQueue.add('emission-record-audit-saved', {
+		const auditSaveJob: EmissionRecordAuditSavedJob = {
 			emission_record_id: data.emission_record_id,
-			...data.emissionRecord
-		})
+			...data.emissionRecord,
+			updateMode: data.updateOperation ?? false
+		}
+		await this.emissionRecordAuditQueue.add('emission-record-audit-saved', auditSaveJob)
 
 		this.logger.log(`[EmissionRecord:Consummer:Audit] Emission record ${data.emission_record_id} sent for saving`)
 	}

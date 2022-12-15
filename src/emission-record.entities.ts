@@ -11,8 +11,14 @@ export class EmissionRecordAudit {
 	}
 	issuer: string
 	emissionRecord: EmissionRecordDTO & {emission_record_id: string}
+	updateOperation?: boolean
 }
 
 export class EmissionRecord extends EmissionRecordDTO {
 	emission_record_id: string
+}
+
+export class EmissionRecordAuditSavedJob extends EmissionRecordDTO {
+	emission_record_id: string
+	updateMode?: boolean
 }

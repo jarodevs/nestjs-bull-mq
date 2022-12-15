@@ -1,4 +1,4 @@
-import {Body, Controller, Logger, Post, Put} from '@nestjs/common';
+import {Body, Controller, Post, Put} from '@nestjs/common';
 import {EmissionRecordProducerService} from './emission-record-producer/emission-record-producer.service';
 import {EmissionRecordDTO} from './emission-record.dto';
 
@@ -14,6 +14,6 @@ export class AppController {
 
 	@Put('emission-record')
 	async updateEmissionRecord(@Body() body: {emissionRecord: Partial<EmissionRecordDTO>, issuer: string}): Promise<void> {
-		return await this.emissionRecordProducerService.updateNewEmissionRecord(body.emissionRecord, body.issuer)
+		return await this.emissionRecordProducerService.updateEmissionRecord(body.emissionRecord, body.issuer)
 	}
 }
