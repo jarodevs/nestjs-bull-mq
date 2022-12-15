@@ -9,26 +9,30 @@ export class EmissionRecordProducerService {
 	private readonly logger = new Logger(EmissionRecordProducerService.name);
 
 	constructor(
-		@InjectQueue('emission-record') private readonly emissionRecordQueue: Queue,
 		@InjectQueue('emission-record-audit') private readonly emissionRecordAuditQueue: Queue,
 	) {}
 
-	async processNewEmissionRecord(emissionRecord: EmissionRecordDTO): Promise<void> {
-		//TODO: Get updater info, not in emission record, another property
-		//TODO Delete metadata from emissionRecord
+	async processNewEmissionRecord(emissionRecord: EmissionRecordDTO, issuer: string): Promise<void> {
 		this.logger.log(`[EmissionRecord:Producer] Start processing new emission record`)
 		this.logger.log(`[EmissionRecord:Producer:Message] Sending audit message`)
 
 		const datetime = new Date().getTime()
 		const emissionRecordId = randomUUID()
-		this.emissionRecordAuditQueue.add('new-emission-record', {
+		const auditRecordId = randomUUID()
+		await this.emissionRecordAuditQueue.add('new-emission-record', {
 			emission_record_id: emissionRecordId,
-			audit_record_id: randomUUID(),
+			audit_record_id: auditRecordId,
 			created_at: datetime,
 			updated_at: datetime,
 			updated_fields: {
-				...emissionRecord
-			}
+				emissionGasName: emissionRecord.emissionGasName,
+				quantity: emissionRecord.quantity,
+				unit: emissionRecord.unit
+			},
+			issuer,
+			emissionRecord
 		})
+
+		this.logger.log(`[EmissionRecord:Producer:Message] Audit message sent for EmissionRecord ${emissionRecordId} and Audit ${auditRecordId}`)
 	}
 }

@@ -2,8 +2,9 @@ import {BullModule} from '@nestjs/bull';
 import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
-import {MessageConsumer} from './message-consumer/message-consumer';
 import {EmissionRecordProducerService} from './emission-record-producer/emission-record-producer.service';
+import {EmissionRecordAuditConsumer} from './audit-consummer/audit-consumer';
+import {EmissionRecordConsumer} from './emission-record-consummer/emission-record-consummer';
 
 @Module({
 	imports: [
@@ -22,6 +23,6 @@ import {EmissionRecordProducerService} from './emission-record-producer/emission
 	],
 	exports: [BullModule],
 	controllers: [AppController],
-	providers: [AppService, MessageConsumer, EmissionRecordProducerService],
+	providers: [AppService, EmissionRecordProducerService, EmissionRecordAuditConsumer, EmissionRecordConsumer],
 })
 export class AppModule {}

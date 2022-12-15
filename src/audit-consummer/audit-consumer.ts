@@ -59,7 +59,7 @@ export class EmissionRecordAuditConsumer {
 				})
 			} else {
 				const parsedEmissionRecordDb = JSON.parse(emissionRecordDb)
-				parsedEmissionRecordDb.audits.push(data)
+				parsedEmissionRecordDb.records.push(data)
 				dataToWrite = JSON.stringify(parsedEmissionRecordDb)
 			}
 
