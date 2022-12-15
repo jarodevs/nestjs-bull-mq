@@ -13,7 +13,7 @@ export class AppController {
 	}
 
 	@Put('emission-record')
-	async updateEmissionRecord(@Body() body: {emissionRecord: Partial<EmissionRecordDTO>, issuer: string}): Promise<void> {
+	async updateEmissionRecord(@Body() body: {emissionRecord: Partial<EmissionRecordDTO> & {emission_record_id: string}, issuer: string}): Promise<void> {
 		return await this.emissionRecordProducerService.updateEmissionRecord(body.emissionRecord, body.issuer)
 	}
 }

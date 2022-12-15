@@ -54,21 +54,34 @@ export class EmissionRecordAuditConsumer {
 	}
 
 	@Process('emission-record-audit-saved')
-	async saveNewEmissionRecord({data}: Job<EmissionRecord>) {
+	async saveNewEmissionRecord({data}: Job<EmissionRecordAuditSavedJob>) {
 		this.logger.log(`[EmissionRecord:Consummer:Record] Receive Emission Record ${data.emission_record_id}`)
 		try {
 			// get mock db file
 			const emissionRecordDb = fs.readFileSync(this.emissionRecordDbFile, {encoding: 'utf8'})
 			let dataToWrite: string;
-			if (!emissionRecordDb || !JSON.parse(emissionRecordDb).records) {
-				dataToWrite = JSON.stringify({
-					records: [
-						data
-					]
-				})
+			if (!data.updateMode) {
+				if (!emissionRecordDb || !JSON.parse(emissionRecordDb).records) {
+					dataToWrite = JSON.stringify({
+						records: [
+							data
+						]
+					})
+				} else {
+					const parsedEmissionRecordDb = JSON.parse(emissionRecordDb)
+					parsedEmissionRecordDb.records.push(data)
+					dataToWrite = JSON.stringify(parsedEmissionRecordDb)
+				}
 			} else {
 				const parsedEmissionRecordDb = JSON.parse(emissionRecordDb)
-				parsedEmissionRecordDb.records.push(data)
+				parsedEmissionRecordDb.records = parsedEmissionRecordDb.records.map((el) => {
+					if (el.emission_record_id === data.emission_record_id) {
+						if (data.emissionGasName) el.emissionGasName = data.emissionGasName
+						if (data.quantity) el.quantity = data.quantity
+						if (data.unit) el.unit = data.unit
+					}
+					return el
+				})
 				dataToWrite = JSON.stringify(parsedEmissionRecordDb)
 			}
 
