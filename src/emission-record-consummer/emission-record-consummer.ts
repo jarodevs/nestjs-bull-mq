@@ -3,7 +3,6 @@ import {Logger} from "@nestjs/common";
 import {Job} from "bull";
 import * as path from "path";
 import * as fs from "fs";
-import {EmissionRecordJob} from "src/emission-record.dto";
 
 @Processor('emission-record')
 export class EmissionRecordConsumer {

@@ -1,7 +1,8 @@
 import {Injectable, Logger} from '@nestjs/common';
 import {InjectQueue} from '@nestjs/bull';
 import {Queue} from 'bull';
-import {EmissionRecordDTO} from 'src/emission-record.dto';
+import {EmissionRecordDTO} from '../emission-record.dto';
+import {EmissionRecordAudit} from '../emission-record.entities'
 import {randomUUID} from 'crypto';
 
 @Injectable()
@@ -23,7 +24,6 @@ export class EmissionRecordProducerService {
 			emission_record_id: emissionRecordId,
 			audit_record_id: auditRecordId,
 			created_at: datetime,
-			updated_at: datetime,
 			updated_fields: {
 				emissionGasName: emissionRecord.emissionGasName,
 				quantity: emissionRecord.quantity,
@@ -31,7 +31,7 @@ export class EmissionRecordProducerService {
 			},
 			issuer,
 			emissionRecord
-		})
+		} as EmissionRecordAudit)
 
 		this.logger.log(`[EmissionRecord:Producer:Message] Audit message sent for EmissionRecord ${emissionRecordId} and Audit ${auditRecordId}`)
 	}
